@@ -24,7 +24,7 @@ export function MachineGrid({ reportId, machines, onMachineClick }: MachineGridP
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4 p-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4">
       {machines.map((machineId) => {
         const status = getMachineStatus(machineId);
         const hasData = status !== "empty";
