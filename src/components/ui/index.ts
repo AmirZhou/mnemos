@@ -4,3 +4,4 @@ export { Select } from "./Select";
 export { Modal } from "./Modal";
 export { NumberInput } from "./NumberInput";
 export { TextArea } from "./TextArea";
+export { TimeInput } from "./TimeInput";
