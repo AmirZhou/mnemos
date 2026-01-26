@@ -173,7 +173,7 @@ export function generateReportText(
   lines.push("");
 
   // Notes
-  lines.push("NOTES");
+  lines.push("*NOTES*");
   lines.push(report.generalNotes?.trim() || "- None");
 
   return lines.join("\n");
