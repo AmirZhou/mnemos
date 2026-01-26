@@ -141,7 +141,8 @@ export function generateReportText(
   } else {
     for (const d of report.downtime) {
       const location = d.machineId || "Cell";
-      lines.push(`• ${location}: ${d.reason} - ${d.durationMinutes} min`);
+      const duration = calculateDuration(d.startTime, d.endTime);
+      lines.push(`• ${location}: ${d.reason} (${d.startTime} - ${d.endTime}, ${formatDuration(duration)})`);
     }
   }
   lines.push("");
