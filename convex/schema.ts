@@ -38,7 +38,8 @@ export default defineSchema({
     reportId: v.id("dailyReports"),
     machineId: v.optional(v.string()),
     reason: v.string(),
-    durationMinutes: v.number(),
+    startTime: v.string(), // "HH:MM" format
+    endTime: v.string(), // "HH:MM" format
   }).index("by_report", ["reportId"]),
 
   activityEntries: defineTable({
