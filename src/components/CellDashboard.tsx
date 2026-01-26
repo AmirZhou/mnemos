@@ -70,14 +70,14 @@ export function CellDashboard({ reportId, userId, onBack }: CellDashboardProps) 
       </header>
 
       {/* Tab bar */}
-      <div className="bg-surface-800 border-b border-surface-700 px-2">
+      <div className="bg-surface-800 border-b border-surface-700 px-1 sm:px-2">
         <div className="flex">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`
-                flex-1 py-3 px-4 text-sm font-medium transition-colors
+                flex-1 py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-medium transition-colors
                 ${
                   activeTab === tab.id
                     ? "text-amber-400 border-b-2 border-amber-400"
