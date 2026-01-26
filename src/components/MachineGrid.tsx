@@ -34,9 +34,9 @@ export function MachineGrid({ reportId, machines, onMachineClick }: MachineGridP
             key={machineId}
             onClick={() => onMachineClick(machineId)}
             className={`
-              relative p-6 rounded-xl transition-all duration-150
-              active:scale-[0.98] min-h-[120px]
-              flex flex-col items-center justify-center gap-2
+              relative p-4 sm:p-6 rounded-xl transition-all duration-150
+              active:scale-[0.98] min-h-[100px] sm:min-h-[120px]
+              flex flex-col items-center justify-center gap-1 sm:gap-2
               ${
                 hasData
                   ? "bg-amber-500/20 border-2 border-amber-500/50 hover:border-amber-400"
