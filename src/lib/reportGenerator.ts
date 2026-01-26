@@ -74,12 +74,12 @@ export function generateReportText(
   const lines: string[] = [];
 
   // Header
-  lines.push(`Setting Tools - Cell ${report.cellId}`);
+  lines.push(`*Setting Tools - Cell ${report.cellId}*`);
   lines.push(`${formatDate(report.date)} | ${report.shift}`);
   lines.push("");
 
   // Production
-  lines.push("PRODUCTION");
+  lines.push("*PRODUCTION*");
 
   // Create a map of machine entries
   const machineMap = new Map<string, MachineWithBatches>();
