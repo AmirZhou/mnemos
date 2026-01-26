@@ -95,7 +95,12 @@ export function DowntimeTab({ reportId, cellId }: DowntimeTabProps) {
       {downtimeEntries && downtimeEntries.length > 0 ? (
         <div className="space-y-3">
           {downtimeEntries.map((entry) => {
-            const duration = calculateDuration(entry.startTime, entry.endTime);
+            // Handle both old (durationMinutes) and new (startTime/endTime) formats
+            const hasTimeRange = entry.startTime && entry.endTime;
+            const duration = hasTimeRange
+              ? calculateDuration(entry.startTime!, entry.endTime!)
+              : entry.durationMinutes ?? 0;
+
             return (
               <div
                 key={entry._id}
@@ -106,10 +111,16 @@ export function DowntimeTab({ reportId, cellId }: DowntimeTabProps) {
                     {entry.machineId || "Cell"}: {entry.reason}
                   </div>
                   <div className="text-sm text-gray-400 mt-1">
-                    <span className="font-mono">{entry.startTime}</span>
-                    <span className="mx-2">→</span>
-                    <span className="font-mono">{entry.endTime}</span>
-                    <span className="ml-2 text-amber-400">({formatDuration(duration)})</span>
+                    {hasTimeRange ? (
+                      <>
+                        <span className="font-mono">{entry.startTime}</span>
+                        <span className="mx-2">→</span>
+                        <span className="font-mono">{entry.endTime}</span>
+                        <span className="ml-2 text-amber-400">({formatDuration(duration)})</span>
+                      </>
+                    ) : (
+                      <span className="text-amber-400">{formatDuration(duration)}</span>
+                    )}
                   </div>
                 </div>
                 <button
