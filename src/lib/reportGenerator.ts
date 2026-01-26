@@ -135,7 +135,7 @@ export function generateReportText(
   lines.push("");
 
   // Downtime
-  lines.push("DOWNTIME");
+  lines.push("*DOWNTIME*");
   if (report.downtime.length === 0) {
     lines.push("- None");
   } else {
