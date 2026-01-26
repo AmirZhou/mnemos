@@ -4,6 +4,31 @@ type BatchEntry = Doc<"batchEntries">;
 type DowntimeEntry = Doc<"downtimeEntries">;
 type ActivityEntry = Doc<"activityEntries">;
 
+function calculateDuration(startTime: string, endTime: string): number {
+  const [startH, startM] = startTime.split(":").map(Number);
+  const [endH, endM] = endTime.split(":").map(Number);
+
+  let startMinutes = startH * 60 + startM;
+  let endMinutes = endH * 60 + endM;
+
+  if (endMinutes < startMinutes) {
+    endMinutes += 24 * 60;
+  }
+
+  return endMinutes - startMinutes;
+}
+
+function formatDuration(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours > 0 && mins > 0) {
+    return `${hours}h ${mins}m`;
+  } else if (hours > 0) {
+    return `${hours}h`;
+  }
+  return `${mins}m`;
+}
+
 interface MachineWithBatches {
   _id: Id<"machineEntries">;
   machineId: string;
