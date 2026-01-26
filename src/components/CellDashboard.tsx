@@ -48,21 +48,21 @@ export function CellDashboard({ reportId, userId, onBack }: CellDashboardProps) 
   return (
     <div className="min-h-screen bg-surface-900 flex flex-col">
       {/* Header */}
-      <header className="bg-surface-800 border-b border-surface-700 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-100">
+      <header className="bg-surface-800 border-b border-surface-700 px-3 sm:px-4 py-2 sm:py-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-100 truncate">
               {cell?.name}
             </h1>
-            <p className="text-sm text-gray-400">
+            <p className="text-xs sm:text-sm text-gray-400 truncate">
               {formatDateForDisplay(report.date)} | {report.shift}
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={onBack}>
+          <div className="flex gap-1 sm:gap-2 shrink-0">
+            <Button variant="ghost" size="sm" onClick={onBack} className="px-2 sm:px-3">
               Exit
             </Button>
-            <Button size="sm" onClick={() => setShowReportPreview(true)}>
+            <Button size="sm" onClick={() => setShowReportPreview(true)} className="px-2 sm:px-3">
               Generate
             </Button>
           </div>
