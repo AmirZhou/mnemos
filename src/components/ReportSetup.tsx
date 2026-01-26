@@ -61,8 +61,8 @@ export function ReportSetup({ userId, onReportReady, onBack }: ReportSetupProps)
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-surface-900">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 bg-surface-900">
+      <div className="w-full max-w-md space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-gray-100">
