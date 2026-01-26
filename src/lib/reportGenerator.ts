@@ -155,7 +155,7 @@ export function generateReportText(
   lines.push("");
 
   // Other Activities
-  lines.push("OTHER ACTIVITIES");
+  lines.push("*OTHER ACTIVITIES*");
   if (report.activities.length === 0) {
     lines.push("- None");
   } else {
