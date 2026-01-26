@@ -16,7 +16,8 @@ export const add = mutation({
     reportId: v.id("dailyReports"),
     machineId: v.optional(v.string()),
     reason: v.string(),
-    durationMinutes: v.number(),
+    startTime: v.string(),
+    endTime: v.string(),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.reportId, { updatedAt: Date.now() });
@@ -25,7 +26,8 @@ export const add = mutation({
       reportId: args.reportId,
       machineId: args.machineId,
       reason: args.reason,
-      durationMinutes: args.durationMinutes,
+      startTime: args.startTime,
+      endTime: args.endTime,
     });
   },
 });
@@ -35,7 +37,8 @@ export const update = mutation({
     id: v.id("downtimeEntries"),
     machineId: v.optional(v.string()),
     reason: v.string(),
-    durationMinutes: v.number(),
+    startTime: v.string(),
+    endTime: v.string(),
   },
   handler: async (ctx, args) => {
     const { id, ...data } = args;
