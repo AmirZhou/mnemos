@@ -45,7 +45,7 @@ export function MachineGrid({ reportId, machines, onMachineClick }: MachineGridP
             `}
           >
             {/* Machine ID */}
-            <span className="font-mono text-2xl font-semibold text-gray-100">
+            <span className="font-mono text-xl sm:text-2xl font-semibold text-gray-100">
               {machineId}
             </span>
 
