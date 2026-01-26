@@ -98,14 +98,14 @@ export function generateReportText(
     const machine = machineMap.get(machineId);
 
     if (!machine || machine.batches.length === 0) {
-      lines.push(`• ${machineId}: (no production)`);
+      lines.push(`• \`${machineId}\`: _(no production)_`);
       continue;
     }
 
     const totalGood = sum(machine.batches, (b) => b.goodQty);
     const totalScrap = sum(machine.batches, (b) => b.scrapQty);
     const scrapSuffix = totalScrap > 0 ? ` / ${totalScrap} scrap` : "";
-    lines.push(`• ${machineId}: ${totalGood} good${scrapSuffix}`);
+    lines.push(`• \`${machineId}\`: ${totalGood} good${scrapSuffix}`);
 
     for (const batch of machine.batches) {
       const parts: string[] = [];
@@ -115,16 +115,16 @@ export function generateReportText(
         parts.push(`${batch.batchNumber}:`);
       }
 
-      // Part code and name
+      // Part code and name (name in italic)
       const partLabel = batch.partName
-        ? `${batch.partCode} ${batch.partName}`
+        ? `${batch.partCode} _${batch.partName}_`
         : batch.partCode;
       parts.push(partLabel);
 
       // Quantities
       parts.push(`- ${batch.goodQty} good`);
       if (batch.scrapQty > 0) {
-        const reason = batch.scrapReason ? ` (${batch.scrapReason})` : "";
+        const reason = batch.scrapReason ? ` _(${batch.scrapReason})_` : "";
         parts.push(`/ ${batch.scrapQty} scrap${reason}`);
       }
 
