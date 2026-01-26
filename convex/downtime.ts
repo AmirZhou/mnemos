@@ -28,6 +28,7 @@ export const add = mutation({
       reason: args.reason,
       startTime: args.startTime,
       endTime: args.endTime,
+      durationMinutes: undefined, // not used for new entries
     });
   },
 });
@@ -42,7 +43,7 @@ export const update = mutation({
   },
   handler: async (ctx, args) => {
     const { id, ...data } = args;
-    await ctx.db.patch(id, data);
+    await ctx.db.patch(id, { ...data, durationMinutes: undefined });
   },
 });
 
