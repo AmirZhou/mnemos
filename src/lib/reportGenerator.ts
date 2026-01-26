@@ -157,15 +157,15 @@ export function generateReportText(
   // Other Activities
   lines.push("*OTHER ACTIVITIES*");
   if (report.activities.length === 0) {
-    lines.push("- None");
+    lines.push("_- None_");
   } else {
     for (const a of report.activities) {
       const parts: string[] = [a.type];
       if (a.durationMinutes) {
-        parts.push(`- ${a.durationMinutes} min`);
+        parts.push(`- _${a.durationMinutes} min_`);
       }
       if (a.notes) {
-        parts.push(`(${a.notes})`);
+        parts.push(`_(${a.notes})_`);
       }
       lines.push(`• ${parts.join(" ")}`);
     }
@@ -174,7 +174,8 @@ export function generateReportText(
 
   // Notes
   lines.push("*NOTES*");
-  lines.push(report.generalNotes?.trim() || "- None");
+  const notesContent = report.generalNotes?.trim();
+  lines.push(notesContent ? `_${notesContent}_` : "_- None_");
 
   return lines.join("\n");
 }
