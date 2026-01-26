@@ -137,16 +137,16 @@ export function generateReportText(
   // Downtime
   lines.push("*DOWNTIME*");
   if (report.downtime.length === 0) {
-    lines.push("- None");
+    lines.push("_- None_");
   } else {
     for (const d of report.downtime) {
-      const location = d.machineId || "Cell";
+      const location = d.machineId ? `\`${d.machineId}\`` : "Cell";
       // Handle both old (durationMinutes) and new (startTime/endTime) formats
       if (d.startTime && d.endTime) {
         const duration = calculateDuration(d.startTime, d.endTime);
-        lines.push(`• ${location}: ${d.reason} (${d.startTime} - ${d.endTime}, ${formatDuration(duration)})`);
+        lines.push(`• ${location}: ${d.reason} (${d.startTime} - ${d.endTime}, _${formatDuration(duration)}_)`);
       } else if (d.durationMinutes) {
-        lines.push(`• ${location}: ${d.reason} - ${formatDuration(d.durationMinutes)}`);
+        lines.push(`• ${location}: ${d.reason} - _${formatDuration(d.durationMinutes)}_`);
       } else {
         lines.push(`• ${location}: ${d.reason}`);
       }
