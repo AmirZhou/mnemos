@@ -94,71 +94,60 @@ export function generateReportText(
     return numA - numB;
   });
 
+  // Collect batch info grouped by machine
+  const batchInfoByMachine = new Map<string, { batchNumber: string; goodQty: number }[]>();
+
   for (const machineId of sortedMachineIds) {
     const machine = machineMap.get(machineId);
 
     if (!machine || machine.batches.length === 0) {
-      lines.push(`• \`${machineId}\`: _(no production)_`);
+      lines.push(`• ${machineId}: _(no production)_`);
+      lines.push("");
       continue;
     }
 
-    const totalGood = sum(machine.batches, (b) => b.goodQty);
-    const totalScrap = sum(machine.batches, (b) => b.scrapQty);
-    const scrapSuffix = totalScrap > 0 ? ` / ${totalScrap} scrap` : "";
-    lines.push(`• \`${machineId}\`: ${totalGood} good${scrapSuffix}`);
+    lines.push(`• ${machineId}:`);
 
     for (const batch of machine.batches) {
-      const parts: string[] = [];
-
-      // Batch number prefix
+      // Collect batch info for later
       if (batch.batchNumber) {
-        parts.push(`${batch.batchNumber}:`);
+        const existing = batchInfoByMachine.get(machineId) || [];
+        existing.push({ batchNumber: batch.batchNumber, goodQty: batch.goodQty });
+        batchInfoByMachine.set(machineId, existing);
       }
 
-      // Part code and name (name in italic)
-      const partLabel = batch.partName
-        ? `${batch.partCode} _${batch.partName}_`
-        : batch.partCode;
-      parts.push(partLabel);
-
-      // Quantities
-      parts.push(`- ${batch.goodQty} good`);
-      if (batch.scrapQty > 0) {
-        const reason = batch.scrapReason ? ` _(${batch.scrapReason})_` : "";
-        parts.push(`/ ${batch.scrapQty} scrap${reason}`);
-      }
-
-      lines.push(`  - ${parts.join(" ")}`);
+      // Simple format: just part code and quantity
+      const qtyText = batch.scrapQty > 0
+        ? `${batch.goodQty} good / ${batch.scrapQty} scrap`
+        : `${batch.goodQty} good`;
+      lines.push(`  - ${batch.partCode} - ${qtyText}`);
     }
+
+    // Add spacing between machines
+    lines.push("");
   }
 
-  lines.push("");
-
-  // Downtime
-  lines.push("*DOWNTIME*");
-  if (report.downtime.length === 0) {
-    lines.push("_- None_");
-  } else {
+  // Downtime - only include if there is any
+  if (report.downtime.length > 0) {
+    lines.push("*DOWNTIME*");
     for (const d of report.downtime) {
-      const location = d.machineId ? `\`${d.machineId}\`` : "Cell";
+      const location = d.machineId || "Cell";
       // Handle both old (durationMinutes) and new (startTime/endTime) formats
       if (d.startTime && d.endTime) {
         const duration = calculateDuration(d.startTime, d.endTime);
-        lines.push(`• ${location}: ${d.reason} (${d.startTime} - ${d.endTime}, _${formatDuration(duration)}_)`);
+        lines.push(`- ${location}: ${d.reason} (${d.startTime} - ${d.endTime}, _${formatDuration(duration)}_)`);
       } else if (d.durationMinutes) {
-        lines.push(`• ${location}: ${d.reason} - _${formatDuration(d.durationMinutes)}_`);
+        lines.push(`- ${location}: ${d.reason} - _${formatDuration(d.durationMinutes)}_`);
       } else {
-        lines.push(`• ${location}: ${d.reason}`);
+        lines.push(`- ${location}: ${d.reason}`);
       }
     }
+    lines.push("");
   }
-  lines.push("");
 
-  // Other Activities
-  lines.push("*OTHER ACTIVITIES*");
-  if (report.activities.length === 0) {
-    lines.push("_- None_");
-  } else {
+  // Other Activities - only include if there is any
+  if (report.activities.length > 0) {
+    lines.push("*OTHER ACTIVITIES*");
     for (const a of report.activities) {
       const parts: string[] = [a.type];
       if (a.durationMinutes) {
@@ -167,15 +156,28 @@ export function generateReportText(
       if (a.notes) {
         parts.push(`_(${a.notes})_`);
       }
-      lines.push(`• ${parts.join(" ")}`);
+      lines.push(`- ${parts.join(" ")}`);
     }
+    lines.push("");
   }
-  lines.push("");
 
-  // Notes
-  lines.push("*NOTES*");
+  // Notes - only include if there are any
   const notesContent = report.generalNotes?.trim();
-  lines.push(notesContent ? `_${notesContent}_` : "_- None_");
+  if (notesContent) {
+    lines.push("*NOTES*");
+    lines.push(notesContent);
+    lines.push("");
+  }
+
+  // Batch info - subtle format at the bottom, only if there are batches
+  if (batchInfoByMachine.size > 0) {
+    const batchLines: string[] = [];
+    for (const [machineId, batches] of batchInfoByMachine) {
+      const batchStr = batches.map(b => `${b.batchNumber} (${b.goodQty})`).join(", ");
+      batchLines.push(`${machineId}: ${batchStr}`);
+    }
+    lines.push(`_Batch: ${batchLines.join(" | ")}_`);
+  }
 
   return lines.join("\n");
 }
