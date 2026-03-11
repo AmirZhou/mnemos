@@ -108,6 +108,8 @@ export function generateReportText(
 
     lines.push(`• ${machineId}:`);
 
+    // Group batches by part code and consolidate quantities
+    const partCodeTotals = new Map<string, { goodQty: number; scrapQty: number }>();
     for (const batch of machine.batches) {
       // Collect batch info for later
       if (batch.batchNumber) {
@@ -116,11 +118,19 @@ export function generateReportText(
         batchInfoByMachine.set(machineId, existing);
       }
 
-      // Simple format: just part code and quantity
-      const qtyText = batch.scrapQty > 0
-        ? `${batch.goodQty} good / ${batch.scrapQty} scrap`
-        : `${batch.goodQty} good`;
-      lines.push(`  - ${batch.partCode} - ${qtyText}`);
+      // Consolidate by part code
+      const existing = partCodeTotals.get(batch.partCode) || { goodQty: 0, scrapQty: 0 };
+      existing.goodQty += batch.goodQty;
+      existing.scrapQty += batch.scrapQty;
+      partCodeTotals.set(batch.partCode, existing);
+    }
+
+    // Output consolidated lines
+    for (const [partCode, totals] of partCodeTotals) {
+      const qtyText = totals.scrapQty > 0
+        ? `${totals.goodQty} good / ${totals.scrapQty} scrap`
+        : `${totals.goodQty} good`;
+      lines.push(`  - ${partCode} - ${qtyText}`);
     }
 
     // Add spacing between machines
