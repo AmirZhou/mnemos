@@ -8,9 +8,9 @@
  * @module
  */
 
-import type * as activities from "../activities.js";
-import type * as downtime from "../downtime.js";
+import type * as areas from "../areas.js";
 import type * as machines from "../machines.js";
+import type * as notes from "../notes.js";
 import type * as parts from "../parts.js";
 import type * as reports from "../reports.js";
 import type * as users from "../users.js";
@@ -22,9 +22,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  activities: typeof activities;
-  downtime: typeof downtime;
+  areas: typeof areas;
   machines: typeof machines;
+  notes: typeof notes;
   parts: typeof parts;
   reports: typeof reports;
   users: typeof users;

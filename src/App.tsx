@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Id } from "../convex/_generated/dataModel";
 import { WelcomeScreen } from "./components/WelcomeScreen";
 import { ReportSetup } from "./components/ReportSetup";
-import { CellDashboard } from "./components/CellDashboard";
+import { ReportDashboard } from "./components/ReportDashboard";
 
 type Screen = "welcome" | "setup" | "dashboard";
 
@@ -58,7 +58,7 @@ function App() {
 
     case "dashboard":
       return userId && reportId ? (
-        <CellDashboard
+        <ReportDashboard
           reportId={reportId}
           userId={userId}
           onBack={handleBackToSetup}

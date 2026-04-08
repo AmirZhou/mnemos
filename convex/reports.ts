@@ -35,25 +35,23 @@ export const getFullReport = query({
             q.eq("machineEntryId", machine._id)
           )
           .collect();
+        batches.sort((a, b) => a.order - b.order);
         return { ...machine, batches };
       })
     );
 
-    const downtime = await ctx.db
-      .query("downtimeEntries")
-      .withIndex("by_report", (q) => q.eq("reportId", args.reportId))
-      .collect();
+    machinesWithBatches.sort((a, b) => a.order - b.order);
 
-    const activities = await ctx.db
-      .query("activityEntries")
+    const notes = await ctx.db
+      .query("noteEntries")
       .withIndex("by_report", (q) => q.eq("reportId", args.reportId))
       .collect();
+    notes.sort((a, b) => a.order - b.order);
 
     return {
       ...report,
       machines: machinesWithBatches,
-      downtime,
-      activities,
+      notes,
     };
   },
 });
@@ -62,46 +60,52 @@ export const create = mutation({
   args: {
     date: v.string(),
     userId: v.id("users"),
-    cellId: v.number(),
     shift: v.string(),
+    area: v.string(),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    return await ctx.db.insert("dailyReports", {
+    const reportId = await ctx.db.insert("dailyReports", {
       date: args.date,
       userId: args.userId,
-      cellId: args.cellId,
       shift: args.shift,
-      generalNotes: "",
+      area: args.area,
       createdAt: now,
       updatedAt: now,
     });
+
+    // Record area usage for future suggestions
+    const existingArea = await ctx.db
+      .query("recentAreas")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .filter((q) => q.eq(q.field("area"), args.area))
+      .first();
+    if (existingArea) {
+      await ctx.db.patch(existingArea._id, { lastUsed: now });
+    } else {
+      await ctx.db.insert("recentAreas", {
+        userId: args.userId,
+        area: args.area,
+        lastUsed: now,
+      });
+    }
+
+    return reportId;
   },
 });
 
-export const updateNotes = mutation({
+export const updateMeta = mutation({
   args: {
     reportId: v.id("dailyReports"),
-    generalNotes: v.string(),
+    shift: v.optional(v.string()),
+    area: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.reportId, {
-      generalNotes: args.generalNotes,
-      updatedAt: Date.now(),
-    });
-  },
-});
-
-export const updateShift = mutation({
-  args: {
-    reportId: v.id("dailyReports"),
-    shift: v.string(),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.reportId, {
-      shift: args.shift,
-      updatedAt: Date.now(),
-    });
+    const { reportId, ...patch } = args;
+    const cleaned: Record<string, unknown> = { updatedAt: Date.now() };
+    if (patch.shift !== undefined) cleaned.shift = patch.shift;
+    if (patch.area !== undefined) cleaned.area = patch.area;
+    await ctx.db.patch(reportId, cleaned);
   },
 });
 

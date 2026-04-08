@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { Button, Select, Input } from "./ui";
-import { CELLS, SHIFTS } from "../config";
-import { getTodayString, formatDateForDisplay } from "../lib/dateUtils";
+import { SHIFTS } from "../config";
+import { getTodayString } from "../lib/dateUtils";
 
 interface ReportSetupProps {
   userId: Id<"users">;
@@ -14,27 +14,37 @@ interface ReportSetupProps {
 
 export function ReportSetup({ userId, onReportReady, onBack }: ReportSetupProps) {
   const user = useQuery(api.users.get, { id: userId });
+  const recentAreas = useQuery(api.areas.getRecentForUser, { userId });
   const createReport = useMutation(api.reports.create);
-  const existingReport = useQuery(api.reports.getByUserAndDate, {
-    userId,
-    date: getTodayString(),
-  });
 
   const [date, setDate] = useState(getTodayString());
-  const [cellId, setCellId] = useState<number>(user?.defaultCell ?? 1);
-  const [shift, setShift] = useState(SHIFTS[0].value);
+  const [area, setArea] = useState("");
+  const [areaSeeded, setAreaSeeded] = useState(false);
+  const [shift, setShift] = useState<string>(SHIFTS[0].value);
   const [customShift, setCustomShift] = useState("");
   const [isCustomShift, setIsCustomShift] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
-  // Check for existing report with selected date
+  // Seed area once from user default or most-recent area
+  useEffect(() => {
+    if (areaSeeded || area !== "") return;
+    const seed = user?.defaultArea || recentAreas?.[0]?.area;
+    if (seed) {
+      setArea(seed);
+      setAreaSeeded(true);
+    }
+  }, [user?.defaultArea, recentAreas, area, areaSeeded]);
+
   const reportForDate = useQuery(api.reports.getByUserAndDate, {
     userId,
     date,
   });
 
+  const effectiveShift = isCustomShift ? customShift.trim() : shift;
+  const canContinue =
+    area.trim().length > 0 && effectiveShift.length > 0 && !isCreating;
+
   const handleContinue = async () => {
-    // If report already exists, use it
     if (reportForDate) {
       onReportReady(reportForDate._id);
       return;
@@ -45,8 +55,8 @@ export function ReportSetup({ userId, onReportReady, onBack }: ReportSetupProps)
       const reportId = await createReport({
         date,
         userId,
-        cellId,
-        shift: isCustomShift ? customShift : shift,
+        shift: effectiveShift,
+        area: area.trim(),
       });
       onReportReady(reportId);
     } finally {
@@ -54,11 +64,14 @@ export function ReportSetup({ userId, onReportReady, onBack }: ReportSetupProps)
     }
   };
 
-  const cellOptions = CELLS.map((c) => ({ value: c.id, label: c.name }));
   const shiftOptions = [
     ...SHIFTS.map((s) => ({ value: s.value, label: s.label })),
     { value: "__custom__", label: "Custom..." },
   ];
+
+  const areaChips = (recentAreas ?? [])
+    .slice(0, 5)
+    .filter((a) => a.area !== area);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 bg-surface-900">
@@ -86,18 +99,34 @@ export function ReportSetup({ userId, onReportReady, onBack }: ReportSetupProps)
             />
             {reportForDate && (
               <p className="mt-2 text-sm text-amber-400">
-                Report exists for this date - will continue editing
+                Report exists for this date — will continue editing
               </p>
             )}
           </div>
 
-          {/* Cell */}
-          <Select
-            label="Cell"
-            options={cellOptions}
-            value={cellId}
-            onChange={(e) => setCellId(Number(e.target.value))}
-          />
+          {/* Area */}
+          <div>
+            <Input
+              label="Area"
+              placeholder="e.g., Setting Tools – Gun Side"
+              value={area}
+              onChange={(e) => setArea(e.target.value)}
+            />
+            {areaChips.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {areaChips.map((a) => (
+                  <button
+                    key={a._id}
+                    type="button"
+                    onClick={() => setArea(a.area)}
+                    className="px-3 py-1 rounded-full bg-surface-700 hover:bg-surface-600 border border-surface-600 text-xs text-gray-300"
+                  >
+                    {a.area}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Shift */}
           <div className="space-y-3">
@@ -116,7 +145,7 @@ export function ReportSetup({ userId, onReportReady, onBack }: ReportSetupProps)
             />
             {isCustomShift && (
               <Input
-                placeholder="e.g., 8am - 6pm"
+                placeholder="e.g., 4:00 PM – 2:00 AM"
                 value={customShift}
                 onChange={(e) => setCustomShift(e.target.value)}
                 autoFocus
@@ -132,7 +161,7 @@ export function ReportSetup({ userId, onReportReady, onBack }: ReportSetupProps)
             <Button
               className="flex-1"
               onClick={handleContinue}
-              disabled={isCreating || (isCustomShift && !customShift.trim())}
+              disabled={!canContinue}
             >
               {isCreating
                 ? "Creating..."

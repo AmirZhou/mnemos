@@ -4,15 +4,14 @@ import { v } from "convex/values";
 export default defineSchema({
   users: defineTable({
     name: v.string(),
-    defaultCell: v.optional(v.number()),
+    defaultArea: v.optional(v.string()),
   }),
 
   dailyReports: defineTable({
     date: v.string(),
     userId: v.id("users"),
-    cellId: v.number(),
     shift: v.string(),
-    generalNotes: v.string(),
+    area: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -22,38 +21,46 @@ export default defineSchema({
   machineEntries: defineTable({
     reportId: v.id("dailyReports"),
     machineId: v.string(),
+    jobNumber: v.optional(v.string()),
+    description: v.optional(v.string()),
+    startTime: v.optional(v.string()), // "HH:MM"
+    endTime: v.optional(v.string()), // "HH:MM"
+    order: v.number(),
   }).index("by_report", ["reportId"]),
 
   batchEntries: defineTable({
     machineEntryId: v.id("machineEntries"),
-    batchNumber: v.optional(v.string()),
     partCode: v.string(),
-    partName: v.optional(v.string()),
-    goodQty: v.number(),
-    scrapQty: v.number(),
-    scrapReason: v.optional(v.string()),
+    qty: v.number(), // total produced; includes scraps
+    scrapQty: v.optional(v.number()),
+    order: v.number(),
   }).index("by_machine_entry", ["machineEntryId"]),
 
-  downtimeEntries: defineTable({
+  noteEntries: defineTable({
     reportId: v.id("dailyReports"),
-    machineId: v.optional(v.string()),
-    reason: v.string(),
-    startTime: v.optional(v.string()), // "HH:MM" format (new)
-    endTime: v.optional(v.string()), // "HH:MM" format (new)
-    durationMinutes: v.optional(v.number()), // legacy field
-  }).index("by_report", ["reportId"]),
-
-  activityEntries: defineTable({
-    reportId: v.id("dailyReports"),
-    type: v.string(),
-    durationMinutes: v.optional(v.number()),
-    notes: v.optional(v.string()),
+    category: v.union(v.literal("operational"), v.literal("credit")),
+    title: v.string(),
+    body: v.string(),
+    order: v.number(),
   }).index("by_report", ["reportId"]),
 
   recentParts: defineTable({
     userId: v.id("users"),
     partCode: v.string(),
-    partName: v.optional(v.string()),
+    lastUsed: v.number(),
+  }).index("by_user", ["userId"]),
+
+  recentMachines: defineTable({
+    userId: v.id("users"),
+    machineId: v.string(),
+    lastUsed: v.number(),
+    lastJobNumber: v.optional(v.string()),
+    lastDescription: v.optional(v.string()),
+  }).index("by_user", ["userId"]),
+
+  recentAreas: defineTable({
+    userId: v.id("users"),
+    area: v.string(),
     lastUsed: v.number(),
   }).index("by_user", ["userId"]),
 });

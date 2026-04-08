@@ -18,22 +18,20 @@ export const get = query({
 export const create = mutation({
   args: {
     name: v.string(),
-    defaultCell: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("users", {
       name: args.name,
-      defaultCell: args.defaultCell,
     });
   },
 });
 
-export const updateDefaultCell = mutation({
+export const setDefaultArea = mutation({
   args: {
     id: v.id("users"),
-    defaultCell: v.number(),
+    defaultArea: v.string(),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.id, { defaultCell: args.defaultCell });
+    await ctx.db.patch(args.id, { defaultArea: args.defaultArea });
   },
 });

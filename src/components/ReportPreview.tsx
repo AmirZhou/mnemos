@@ -4,7 +4,6 @@ import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { Modal, Button } from "./ui";
 import { generateReportText } from "../lib/reportGenerator";
-import { getMachinesForCell } from "../config";
 
 interface ReportPreviewProps {
   isOpen: boolean;
@@ -24,8 +23,7 @@ export function ReportPreview({ isOpen, onClose, reportId }: ReportPreviewProps)
     );
   }
 
-  const machines = getMachinesForCell(report.cellId);
-  const reportText = generateReportText(report, machines);
+  const reportText = generateReportText(report);
 
   const handleCopy = async () => {
     try {
