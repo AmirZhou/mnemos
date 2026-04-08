@@ -9,9 +9,11 @@ export const list = query({
 });
 
 export const get = query({
-  args: { id: v.id("users") },
+  args: { id: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    const normalized = ctx.db.normalizeId("users", args.id);
+    if (!normalized) return null;
+    return await ctx.db.get(normalized);
   },
 });
 
