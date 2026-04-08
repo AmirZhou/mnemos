@@ -65,11 +65,11 @@ function renderBatch(b: BatchEntry): string {
 
 function renderMachineBlock(m: MachineWithBatches): string[] {
   const lines: string[] = [];
-  lines.push(machineHeader(m));
+  lines.push(`*${machineHeader(m)}*`);
 
   if (m.startTime && m.endTime) {
     lines.push(
-      `Production time: ${formatTime12h(m.startTime)} – ${formatTime12h(m.endTime)}`
+      `_Production time: ${formatTime12h(m.startTime)} – ${formatTime12h(m.endTime)}_`
     );
   }
 
@@ -79,7 +79,7 @@ function renderMachineBlock(m: MachineWithBatches): string[] {
 
   const total = m.batches.reduce((sum, b) => sum + b.qty, 0);
   if (m.batches.length > 0) {
-    lines.push(`Total: ${total} ${pluralize(total, "pc", "pcs")}`);
+    lines.push(`_Total: ${total} ${pluralize(total, "pc", "pcs")}_`);
   }
 
   return lines;
@@ -90,13 +90,13 @@ export function generateReportText(report: FullReport): string {
 
   // Header
   sections.push([
-    `Date: ${formatDateLong(report.date)}`,
-    `Shift: ${report.shift}`,
-    `Area: ${report.area}`,
+    `*Date:* ${formatDateLong(report.date)}`,
+    `*Shift:* ${report.shift}`,
+    `*Area:* ${report.area}`,
   ]);
 
   // Production Summary
-  const productionLines: string[] = ["Production Summary", ""];
+  const productionLines: string[] = ["*Production Summary*", ""];
   const machinesWithWork = report.machines.filter((m) => m.batches.length > 0);
 
   if (machinesWithWork.length === 0) {
@@ -114,9 +114,9 @@ export function generateReportText(report: FullReport): string {
     .filter((n) => n.category === "operational")
     .sort((a, b) => a.order - b.order);
   if (operational.length > 0) {
-    const lines: string[] = ["Operational Notes", ""];
+    const lines: string[] = ["*Operational Notes*", ""];
     operational.forEach((n, idx) => {
-      if (n.title) lines.push(n.title);
+      if (n.title) lines.push(`*${n.title}*`);
       if (n.body) lines.push(n.body);
       if (idx < operational.length - 1) lines.push("");
     });
@@ -128,9 +128,9 @@ export function generateReportText(report: FullReport): string {
     .filter((n) => n.category === "credit")
     .sort((a, b) => a.order - b.order);
   if (credit.length > 0) {
-    const lines: string[] = ["Credit and Teamwork", ""];
+    const lines: string[] = ["*Credit and Teamwork*", ""];
     credit.forEach((n, idx) => {
-      if (n.title) lines.push(n.title);
+      if (n.title) lines.push(`*${n.title}*`);
       if (n.body) lines.push(n.body);
       if (idx < credit.length - 1) lines.push("");
     });
